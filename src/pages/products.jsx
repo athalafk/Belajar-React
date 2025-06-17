@@ -117,7 +117,7 @@ const ProductsPage = () => {
                     name="search"
                     type="text"
                     className="border border-gray-300 px-4 py-2 rounded w-1/2"
-                    placeholder="Cari produk..."
+                    placeholder="Search product..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                 />
