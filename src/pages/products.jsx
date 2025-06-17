@@ -12,6 +12,7 @@ const username = email ? email.split('@')[0] : '';
 const ProductsPage = () => {
     const [products, setProducts] = useState([]);
     const [search, setSearch] = useState("");
+    const [loading, setLoading] = useState(true);
     const { cart, handleAddToCart, handleRemoveItem, handleClearCart } = useContext(CartContext); 
 
     const totalPrice = cart.reduce((acc, item) => acc + (item.price || 0) * item.qty, 0);
@@ -26,7 +27,10 @@ const ProductsPage = () => {
                 }));
                 setProducts(formatted);
             })
-            .catch((error) => console.error("Error fetching products:", error));
+            .catch((error) => console.error("Error fetching products:", error))
+            .finally(() => {
+                setLoading(false);
+            });
     }, []);
 
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -120,29 +124,32 @@ const ProductsPage = () => {
             </div>
 
             <div className="flex justify-center py-5">
-                <div className="w-[80%] flex flex-wrap gap-2">
-                    {products
-                        .filter((product) =>
-                            product.title.toLowerCase().includes(search.toLowerCase())
-                        )
-                        .map((product) => (
-                            <Link to={`/product/${product.id}`} key={product.id}> 
-                                <CardProduct>
-                                    <CardProduct.Header image={product.image} />
-                                    <CardProduct.Body title={product.title}>
-                                        {product.description}
-                                    </CardProduct.Body>
-                                    <CardProduct.Footer
-                                        price={product.price}
-                                        handleAddToCart={(e) => {
-                                            e.preventDefault()
-                                            handleAddToCart(product)
-                                        }}
-                                    />
-                                </CardProduct>
-                            </Link>
-
-                        ))}
+                <div className="w-[80%] flex flex-wrap gap-2 justify-center">
+                    {loading ? (
+                        <p className="text-xl">Loading products...</p>
+                    ) : (
+                        products
+                            .filter((product) =>
+                                product.title.toLowerCase().includes(search.toLowerCase())
+                            )
+                            .map((product) => (
+                                <Link to={`/product/${product.id}`} key={product.id}> 
+                                    <CardProduct>
+                                        <CardProduct.Header image={product.image} />
+                                        <CardProduct.Body title={product.title}>
+                                            {product.description}
+                                        </CardProduct.Body>
+                                        <CardProduct.Footer
+                                            price={product.price}
+                                            handleAddToCart={(e) => {
+                                                e.preventDefault()
+                                                handleAddToCart(product)
+                                            }}
+                                        />
+                                    </CardProduct>
+                                </Link>
+                            ))
+                    )}
                 </div>
 
                 <div className="w-[29%] p-4 bg-white rounded-lg shadow">
