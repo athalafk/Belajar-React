@@ -1,18 +1,20 @@
-import { Fragment, useState, useEffect, useRef } from "react";
+import { Fragment, useState, useEffect, useRef, useContext } from "react";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'; 
+import { faChevronDown, faRightFromBracket, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { Link } from 'react-router-dom';
+import { CartContext } from "../context/CartContext";
 import CardProduct from "../components/Fragments/CardProduct";
-import Button from "../components/Elements/Button";
 // import Counter from "../components/Fragments/Counter";
 
 const email = localStorage.getItem("email");
+const username = email ? email.split('@')[0] : '';
 
 const ProductsPage = () => {
     const [products, setProducts] = useState([]);
-    const [cart, setCart] = useState(() => {
-        const savedCart = localStorage.getItem("cart");
-        return savedCart ? JSON.parse(savedCart) : [];
-    });
-    const [totalPrice, setTotalPrice] = useState(0);
     const [search, setSearch] = useState("");
+    const { cart, handleAddToCart, handleRemoveItem, handleClearCart } = useContext(CartContext); 
+
+    const totalPrice = cart.reduce((acc, item) => acc + (item.price || 0) * item.qty, 0);
 
     useEffect(() => {
         fetch("https://fakestoreapi.com/products")
@@ -27,41 +29,25 @@ const ProductsPage = () => {
             .catch((error) => console.error("Error fetching products:", error));
     }, []);
 
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
+
     useEffect(() => {
-        localStorage.setItem("cart", JSON.stringify(cart));
-        const total = cart.reduce((acc, item) => acc + (item.price || 0) * item.qty, 0);
-        setTotalPrice(total);
-    }, [cart]);
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsDropdownOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [dropdownRef]);
 
     const handleLogout = () => {
         localStorage.removeItem("email");
         localStorage.removeItem("password");
         window.location.href = "/login";
-    };
-
-    const handleAddToCart = (product) => {
-        const existingItem = cart.find((item) => item.title === product.title);
-        if (existingItem) {
-            setCart(
-                cart.map((item) =>
-                    item.title === product.title
-                        ? { ...item, qty: item.qty + 1 }
-                        : item
-                )
-            );
-        } else {
-            setCart([...cart, { title: product.title, qty: 1, price: product.price }]);
-        }
-    };
-
-    const handleRemoveItem = (title) => {
-        const updatedCart = cart.filter((item) => item.title !== title);
-        setCart(updatedCart);
-    };
-
-    const handleClearCart = () => {
-        setCart([]);
-        localStorage.removeItem("cart");
     };
 
     //useRef
@@ -94,13 +80,37 @@ const ProductsPage = () => {
 
     return (
         <Fragment>
-            <div className="flex justify-end h-20 bg-blue-600 text-white items-center px-10">
-                {email}
-                <Button classname="ml-5 bg-black" onClick={handleLogout}>Logout</Button>
+            <div className="flex justify-between h-20 bg-blue-600 text-white items-center px-10">
+                <h1 className="text-2xl font-bold">TokoSaya</h1>
+                <div className="relative" ref={dropdownRef}>
+                    <button
+                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                        className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white font-medium py-2 px-4 rounded-lg"
+                    >
+                        <span className="capitalize">{username}</span>
+                        <FontAwesomeIcon icon={faChevronDown} className="w-4 h-4" />
+                    </button>
+
+                    {isDropdownOpen && (
+                        <div className="absolute right-0 mt-2 w-56 origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50">
+                            <div className="py-1 text-gray-700">
+                                <button
+                                    onClick={handleLogout}
+                                    className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-100"
+                                >
+                                    <FontAwesomeIcon icon={faRightFromBracket} className="w-5 h-5" />
+                                    Logout
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
 
             <div className="w-full flex justify-center mt-6 mb-4">
                 <input
+                    id="search"
+                    name="search"
                     type="text"
                     className="border border-gray-300 px-4 py-2 rounded w-1/2"
                     placeholder="Cari produk..."
@@ -110,22 +120,28 @@ const ProductsPage = () => {
             </div>
 
             <div className="flex justify-center py-5">
-                <div className="w-3/4 flex flex-wrap gap-0">
+                <div className="w-[80%] flex flex-wrap gap-2">
                     {products
                         .filter((product) =>
                             product.title.toLowerCase().includes(search.toLowerCase())
                         )
                         .map((product) => (
-                            <CardProduct key={product.id}>
-                                <CardProduct.Header image={product.image} />
-                                <CardProduct.Body title={product.title}>
-                                    {product.description}
-                                </CardProduct.Body>
-                                <CardProduct.Footer
-                                    price={product.price}
-                                    handleAddToCart={() => handleAddToCart(product)}
-                                />
-                            </CardProduct>
+                            <Link to={`/product/${product.id}`} key={product.id}> 
+                                <CardProduct>
+                                    <CardProduct.Header image={product.image} />
+                                    <CardProduct.Body title={product.title}>
+                                        {product.description}
+                                    </CardProduct.Body>
+                                    <CardProduct.Footer
+                                        price={product.price}
+                                        handleAddToCart={(e) => {
+                                            e.preventDefault()
+                                            handleAddToCart(product)
+                                        }}
+                                    />
+                                </CardProduct>
+                            </Link>
+
                         ))}
                 </div>
 
@@ -159,21 +175,8 @@ const ProductsPage = () => {
                                         }) || "-"}
                                     </td>
                                     <td className="py-2 px-2 text-right">
-                                        <button onClick={() => handleRemoveItem(item.title)}>
-                                            <svg 
-                                                xmlns="http://www.w3.org/2000/svg" 
-                                                fill="none" 
-                                                viewBox="0 0 24 24" 
-                                                strokeWidth="1.5" 
-                                                stroke="currentColor" 
-                                                className="w-5 h-5 text-red-600 hover:text-red-800"
-                                            >
-                                                <path 
-                                                    strokeLinecap="round" 
-                                                    strokeLinejoin="round" 
-                                                    d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.033-2.134H8.71c-1.123 0-2.033.954-2.033 2.134v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" 
-                                                />
-                                            </svg>
+                                        <button onClick={() => handleRemoveItem(item.id)}>
+                                            <FontAwesomeIcon icon={faTrash} className="w-5 h-5 text-red-600 hover:text-red-800" />
                                         </button>
                                     </td>
                                 </tr>

@@ -3,7 +3,7 @@ import Button from '../Elements/Button';
 const CardProduct = (props) => {
     const { children } = props;
     return (
-        <div className="w-full max-w-3xs bg-gray-800 border border-gray-700 rounded-lg shadow mx-2 my-2 flex flex-col justify-between">
+        <div className="w-full h-full max-w-3xs bg-gray-800 border border-gray-700 rounded-lg shadow mx-2 my-2 flex flex-col justify-between">
             {children}
         </div>
     )
@@ -12,15 +12,13 @@ const CardProduct = (props) => {
 const Header = (props) => {
     const { image } = props;
     return (
-        <a href="#">
-            <div className="h-64 overflow-hidden rounded-t-lg">
-                <img 
-                src={image}
-                alt="products" 
-                className="w-full h-full object-cover p-4"
-                />
-            </div>
-        </a> 
+        <div className="h-64 overflow-hidden rounded-t-lg">
+            <img 
+            src={image}
+            alt="products" 
+            className="w-full h-full object-cover p-4"
+            />
+        </div>
     )
 }
 
@@ -28,14 +26,12 @@ const Body = (props) => {
     const { title, children } = props;
     return (
         <div className="px-5 pb-5 flex-grow">
-            <a href="" className="">
-                <h5 className="text-lg font-semibold tracking-tight text-white">
-                    {title}
-                </h5>
-                <p className="text-sm text-white line-clamp-2">
-                    {children}
-                </p>
-            </a>
+            <h5 className="text-lg font-semibold tracking-tight text-white">
+                {title}
+            </h5>
+            <p className="text-sm text-white line-clamp-2">
+                {children}
+            </p>
         </div> 
     )
 }
