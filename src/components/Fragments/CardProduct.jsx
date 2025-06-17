@@ -27,7 +27,7 @@ const Header = (props) => {
 const Body = (props) => {
     const { title, children } = props;
     return (
-        <div className="px-5 pb-5 h-full">
+        <div className="px-5 pb-5 flex-grow">
             <a href="" className="">
                 <h5 className="text-lg font-semibold tracking-tight text-white">
                     {title}
