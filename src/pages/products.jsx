@@ -131,28 +131,28 @@ const ProductsPage = () => {
 
                 <div className="w-[29%] p-4 bg-white rounded-lg shadow">
                     <h1 className="text-3xl text-blue-600 mb-4">Cart</h1>
-                    <table className="w-full text-sm text-left text-gray-700">
+                    <table className="w-full text-sm text-left text-gray-700 table-fixed">
                         <thead className="text-xs text-gray-500 uppercase border-b">
                             <tr>
-                                <th className="py-2 px-4">Product</th>
-                                <th className="py-2 px-4">Price</th>
-                                <th className="py-2 px-4">Qty</th>
-                                <th className="py-2 px-4">Total</th>
-                                <th className="py-2 px-4"></th>
+                                <th className="py-2 px-4 w-5/12">Product</th>
+                                <th className="py-2 px-4 w-3/12">Price</th>
+                                <th className="py-2 px-4 w-1/12">Qty</th>
+                                <th className="py-2 px-4 w-3/12">Total</th>
+                                <th className="py-2 px-4 w-1/12"></th>
                             </tr>
                         </thead>
                         <tbody>
                             {cart.map((item, index) => (
                                 <tr key={index} className="border-b">
-                                    <td className="py-2 px-4">{item.title}</td>
-                                    <td className="py-2 px-4">
+                                    <td className="py-2 px-4 text-sm">{item.title}</td>
+                                    <td className="py-2 px-4 text-sm">
                                         {item.price?.toLocaleString("id-ID", {
                                             style: "currency",
                                             currency: "USD",
                                         }) || "-"}
                                     </td>
-                                    <td className="py-2 px-4">{item.qty}</td>
-                                    <td className="py-2 px-4">
+                                    <td className="py-2 px-4 text-sm">{item.qty}</td>
+                                    <td className="py-2 px-4 text-sm">
                                         {(item.price * item.qty)?.toLocaleString("id-ID", {
                                             style: "currency",
                                             currency: "USD",
