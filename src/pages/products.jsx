@@ -110,7 +110,7 @@ const ProductsPage = () => {
             </div>
 
             <div className="flex justify-center py-5">
-                <div className="w-3/4 flex flex-wrap gap-4">
+                <div className="w-3/4 flex flex-wrap gap-0">
                     {products
                         .filter((product) =>
                             product.title.toLowerCase().includes(search.toLowerCase())
@@ -129,41 +129,51 @@ const ProductsPage = () => {
                         ))}
                 </div>
 
-                <div className="w-1/4 p-4 bg-white rounded-lg shadow">
+                <div className="w-[29%] p-4 bg-white rounded-lg shadow">
                     <h1 className="text-3xl text-blue-600 mb-4">Cart</h1>
                     <table className="w-full text-sm text-left text-gray-700">
                         <thead className="text-xs text-gray-500 uppercase border-b">
                             <tr>
-                                <th className="py-2">Product</th>
-                                <th className="py-2">Price</th>
-                                <th className="py-2">Qty</th>
-                                <th className="py-2">Total</th>
-                                <th className="py-2"></th>
+                                <th className="py-2 px-4">Product</th>
+                                <th className="py-2 px-4">Price</th>
+                                <th className="py-2 px-4">Qty</th>
+                                <th className="py-2 px-4">Total</th>
+                                <th className="py-2 px-4"></th>
                             </tr>
                         </thead>
                         <tbody>
                             {cart.map((item, index) => (
                                 <tr key={index} className="border-b">
-                                    <td className="py-2">{item.title}</td>
-                                    <td className="py-2">
+                                    <td className="py-2 px-4">{item.title}</td>
+                                    <td className="py-2 px-4">
                                         {item.price?.toLocaleString("id-ID", {
                                             style: "currency",
                                             currency: "USD",
                                         }) || "-"}
                                     </td>
-                                    <td className="py-2">{item.qty}</td>
-                                    <td className="py-2">
+                                    <td className="py-2 px-4">{item.qty}</td>
+                                    <td className="py-2 px-4">
                                         {(item.price * item.qty)?.toLocaleString("id-ID", {
                                             style: "currency",
                                             currency: "USD",
                                         }) || "-"}
                                     </td>
-                                    <td className="py-2 text-right">
-                                        <button
-                                            className="text-red-600 hover:underline text-sm"
-                                            onClick={() => handleRemoveItem(item.title)}
-                                        >
-                                            Hapus
+                                    <td className="py-2 px-2 text-right">
+                                        <button onClick={() => handleRemoveItem(item.title)}>
+                                            <svg 
+                                                xmlns="http://www.w3.org/2000/svg" 
+                                                fill="none" 
+                                                viewBox="0 0 24 24" 
+                                                strokeWidth="1.5" 
+                                                stroke="currentColor" 
+                                                className="w-5 h-5 text-red-600 hover:text-red-800"
+                                            >
+                                                <path 
+                                                    strokeLinecap="round" 
+                                                    strokeLinejoin="round" 
+                                                    d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.033-2.134H8.71c-1.123 0-2.033.954-2.033 2.134v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" 
+                                                />
+                                            </svg>
                                         </button>
                                     </td>
                                 </tr>
