@@ -1,68 +1,100 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useReducer, useEffect, useCallback } from "react";
 import Notification from "../components/Elements/Notification";
 
 export const CartContext = createContext();
 
-export const CartProvider = ({ children }) => {
-    const [cart, setCart] = useState(() => {
-        const savedCart = localStorage.getItem("cart");
-        return savedCart ? JSON.parse(savedCart) : [];
-    });
+const cartReducer = (state, action) => {
+    switch (action.type) {
+        case 'ADD_TO_CART': {
+            const { product } = action.payload;
+            const existingItem = state.cart.find((item) => item.id === product.id);
+            if (existingItem) {
+                return {
+                    ...state,
+                    cart: state.cart.map((item) =>
+                        item.id === product.id
+                            ? { ...item, qty: item.qty + 1 }
+                            : item
+                    )
+                };
+            }
+            return {
+                ...state,
+                cart: [...state.cart, { ...product, qty: 1 }]
+            };
+        }
+        case 'REMOVE_ITEM': {
+            return {
+                ...state,
+                cart: state.cart.filter((item) => item.id !== action.payload.productId)
+            };
+        }
+        case 'CLEAR_CART': {
+            return {
+                ...state,
+                cart: []
+            };
+        }
+        case 'SET_NOTIFICATION': {
+            return {
+                ...state,
+                notification: action.payload.message
+            };
+        }
+        default:
+            return state;
+    }
+};
 
-    const [notification, setNotification] = useState("");
+export const CartProvider = ({ children }) => {
+    const initialState = {
+        cart: JSON.parse(localStorage.getItem("cart")) || [],
+        notification: ""
+    };
+    const [state, dispatch] = useReducer(cartReducer, initialState);
 
     useEffect(() => {
-        localStorage.setItem("cart", JSON.stringify(cart));
-    }, [cart]);
+        localStorage.setItem("cart", JSON.stringify(state.cart));
+    }, [state.cart]);
 
-    const handleAddToCart = (product) => {
-        const existingItem = cart.find((item) => item.id === product.id);
-        if (existingItem) {
-            setCart(
-                cart.map((item) =>
-                    item.id === product.id
-                        ? { ...item, qty: item.qty + 1 }
-                        : item
-                )
-            );
-        } else {
-            setCart([...cart, { ...product, qty: 1 }]);
-        }
-        setNotification(`Successfully added "${product.title.substring(0, 20)}..." to cart`);
+    const handleAddToCart = useCallback((product) => {
+        dispatch({ type: 'ADD_TO_CART', payload: { product } });
+        dispatch({ type: 'SET_NOTIFICATION', payload: { message: `Successfully added "${product.title.substring(0, 20)}..." to cart` } });
         setTimeout(() => {
-            setNotification("");
+            dispatch({ type: 'SET_NOTIFICATION', payload: { message: "" } });
         }, 3000);
-    };
+    }, []);
 
-    const handleRemoveItem = (productId) => {
-        const itemToRemove = cart.find((item) => item.id === productId);
-        const updatedCart = cart.filter((item) => item.id !== productId);
-        setCart(updatedCart);
-
-        if (itemToRemove) {
-            setNotification(`Removed "${itemToRemove.title.substring(0, 20)}..." from cart`);
+    const handleRemoveItem = useCallback((productId) => {
+        const itemToRemove = state.cart.find((item) => item.id === productId);
+        if(itemToRemove) {
+            dispatch({ type: 'REMOVE_ITEM', payload: { productId } });
+            dispatch({ type: 'SET_NOTIFICATION', payload: { message: `Removed "${itemToRemove.title.substring(0, 20)}..." from cart` } });
             setTimeout(() => {
-                setNotification("");
+                dispatch({ type: 'SET_NOTIFICATION', payload: { message: "" } });
             }, 3000);
         }
-    };
+    }, [state.cart]);
 
-    const handleClearCart = () => {
-        setCart([]);
-        localStorage.removeItem("cart");
-        setNotification("Cart has been cleared successfully");
+    const handleClearCart = useCallback(() => {
+        dispatch({ type: 'CLEAR_CART' });
+        dispatch({ type: 'SET_NOTIFICATION', payload: { message: "Cart has been cleared successfully" } });
         setTimeout(() => {
-            setNotification("");
+            dispatch({ type: 'SET_NOTIFICATION', payload: { message: "" } });
         }, 3000);
-    };
+    }, []);
 
+    const value = {
+        cart: state.cart,
+        handleAddToCart,
+        handleRemoveItem,
+        handleClearCart
+    };
 
     return (
-        <CartContext.Provider 
-            value={{ cart, handleAddToCart, handleRemoveItem, handleClearCart }}
-        >
+        <CartContext.Provider value={value}>
             {children}
-            <Notification message={notification} />
+            <Notification message={state.notification} />
         </CartContext.Provider>
     );
 }
