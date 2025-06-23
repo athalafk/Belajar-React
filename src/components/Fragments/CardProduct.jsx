@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import Button from '../Elements/Button';
 
 const CardProduct = (props) => {
@@ -9,8 +10,13 @@ const CardProduct = (props) => {
     )
 }
 
-const Header = (props) => {
+const areEqual = (prevProps, nextProps) => {
+    return prevProps.price === nextProps.price;
+}
+
+const Header = memo((props) => {
     const { image } = props;
+    console.log("Render Header");
     return (
         <div className="h-64 overflow-hidden rounded-t-lg">
             <img 
@@ -20,10 +26,11 @@ const Header = (props) => {
             />
         </div>
     )
-}
+})
 
-const Body = (props) => {
+const Body = memo((props) => {
     const { title, children } = props;
+    console.log("Render Body");
     return (
         <div className="px-5 pb-5 flex-grow">
             <h5 className="text-lg font-semibold tracking-tight text-white">
@@ -34,10 +41,11 @@ const Body = (props) => {
             </p>
         </div> 
     )
-}
+})
 
-const Footer = (props) => {
+const Footer = memo((props) => {
     const { price, handleAddToCart } = props;
+    console.log("Render Footer");
     return (
         <div className="flex flex-col items-start gap-2 px-5 pb-5">
             <span className="text-2xl font-bold text-white">{price.toLocaleString('id-ID', { style: 'currency', currency: 'USD' })}</span>
@@ -50,7 +58,7 @@ const Footer = (props) => {
             </Button>
         </div> 
     )
-}
+}, areEqual)
 
 CardProduct.Header = Header;
 CardProduct.Body = Body;

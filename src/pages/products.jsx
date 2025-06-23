@@ -1,9 +1,20 @@
-import { Fragment, useState, useEffect, useRef, useContext } from "react";
+import { Fragment, useState, useEffect, useRef, useContext, useMemo } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'; 
 import { faChevronDown, faRightFromBracket, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
 import { CartContext } from "../context/CartContext";
 import CardProduct from "../components/Fragments/CardProduct";
+
+// Error Boundary
+import ErrorBoundary from "../components/Elements/ErrorBoundary";
+
+// HOCs
+// import withAuth from "../hocs/withAuth";
+
+// Custom Hooks
+import useAuth from "../hooks/useAuth";
+
+// Lifecycle Methods
 // import Counter from "../components/Fragments/Counter";
 
 const email = localStorage.getItem("email");
@@ -14,8 +25,13 @@ const ProductsPage = () => {
     const [search, setSearch] = useState("");
     const [loading, setLoading] = useState(true);
     const { cart, handleAddToCart, handleRemoveItem, handleClearCart } = useContext(CartContext); 
-
-    const totalPrice = cart.reduce((acc, item) => acc + (item.price || 0) * item.qty, 0);
+    
+    // console.log("Calculating total price...");
+    // const totalPrice = cart.reduce((acc, item) => acc + (item.price || 0) * item.qty, 0);
+    const totalPrice = useMemo(() => {
+        console.log("Calculating total price...");
+        return cart.reduce((acc, item) => acc + (item.price || 0) * item.qty, 0);
+    }, [cart]);
 
     useEffect(() => {
         fetch("https://fakestoreapi.com/products")
@@ -54,35 +70,42 @@ const ProductsPage = () => {
         window.location.href = "/login";
     };
 
-    //useRef
-    const cartRef = useRef(JSON.parse(localStorage.getItem("cart")) || []);
+    // useRef Example
+    // const cartRef = useRef(JSON.parse(localStorage.getItem("cart")) || []);
 
-    const handleAddToCartWithRef = (product) => {
-        const existingItemIndex = cartRef.current.findIndex(
-            (item) => item.id === product.id
-        );
+    // const handleAddToCartWithRef = (product) => {
+    //     const existingItemIndex = cartRef.current.findIndex(
+    //         (item) => item.id === product.id
+    //     );
 
-        if (existingItemIndex !== -1) {
-            cartRef.current[existingItemIndex].qty += 1;
-        } else {
-            cartRef.current.push({ ...product, qty: 1 });
-        }
+    //     if (existingItemIndex !== -1) {
+    //         cartRef.current[existingItemIndex].qty += 1;
+    //     } else {
+    //         cartRef.current.push({ ...product, qty: 1 });
+    //     }
 
-        localStorage.setItem("cart", JSON.stringify(cartRef.current));
-    };
+    //     localStorage.setItem("cart", JSON.stringify(cartRef.current));
+    // };
 
-    const totalPriceRef = useRef(null)
+    // const totalPriceRef = useRef(null)
 
-    useEffect(() => {
-        if (totalPriceRef.current) {
-            totalPriceRef.current.style.display = cart.length > 0 ? "block" : "none";
-        }
-    }, [cart]);
+    // useEffect(() => {
+    //     if (totalPriceRef.current) {
+    //         totalPriceRef.current.style.display = cart.length > 0 ? "block" : "none";
+    //     }
+    // }, [cart]);
 
-    // Lifecycle
+    // Lifecycle Example
     // const [showCounter, setShowCounter] = useState(true);
 
+    // Custom Hooks Auth Check
+    const isAuthenticated = useAuth();
+    if (!isAuthenticated) {
+        return null;
+    }
+
     return (
+        <ErrorBoundary fallback={<div className="flex justify-center items-center h-screen">Something went wrong</div>}>
         <Fragment>
             <div className="flex justify-between h-20 bg-blue-600 text-white items-center px-10">
                 <h1 className="text-2xl font-bold">TokoSaya</h1>
@@ -228,6 +251,7 @@ const ProductsPage = () => {
             {showCounter && <Counter />}
         </div> */}
         </Fragment>
+        </ErrorBoundary>
     );
 };
 

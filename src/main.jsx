@@ -1,13 +1,14 @@
-import { StrictMode } from 'react'
+import { StrictMode, lazy, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
-import './index.css'
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import { CartProvider } from './context/CartContext'
-import LoginPage from './pages/login'
-import RegisterPage from './pages/register'
-import ErrorPage from './pages/404'
-import ProductsPage from './pages/products'
-import DetailProductPage from './pages/detailProduct'
+import './index.css'
+
+const LoginPage = lazy(() => import('./pages/login'));
+const RegisterPage = lazy(() => import('./pages/register'));
+const ProductsPage = lazy(() => import('./pages/products'));
+const DetailProductPage = lazy(() => import('./pages/detailProduct'));
+const ErrorPage = lazy(() => import('./pages/404'));
 
 const router = createBrowserRouter([
   {
@@ -39,8 +40,10 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <CartProvider>
-      <RouterProvider router={router}/>
-    </CartProvider>
+      <CartProvider>
+        <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
+          <RouterProvider router={router}/>
+        </Suspense>
+      </CartProvider>
   </StrictMode>,
 );
