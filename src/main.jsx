@@ -1,7 +1,9 @@
 import { StrictMode, lazy, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
-import { CartProvider } from './context/CartContext'
+import { Provider } from 'react-redux';
+import { store } from './redux/store';
+import MainLayout from './components/Layouts/MainLayouts'; 
 import './index.css'
 
 const LoginPage = lazy(() => import('./pages/login'));
@@ -12,38 +14,43 @@ const ErrorPage = lazy(() => import('./pages/404'));
 
 const router = createBrowserRouter([
   {
-    path: '/',
-    element: <Navigate to="/login" replace />,
-    errorElement: <Navigate to="/404" replace />,
+      path: '/login',
+      element: <LoginPage />,
   },
   {
-    path: '/login',
-    element: <LoginPage />,
-  },
-    {
-    path: '/register',
-    element: <RegisterPage />,
+      path: '/register',
+      element: <RegisterPage />,
   },
   {
-    path: '/products',
-    element: <ProductsPage />,
+      path: '/404',
+      element: <ErrorPage />,
   },
-  { 
-    path: '/product/:id',
-    element: <DetailProductPage />,
-  },
+
   {
-    path: '/404',
-    element: <ErrorPage />,
+      element: <MainLayout />, 
+      children: [
+          {
+              path: '/products',
+              element: <ProductsPage />,
+          },
+          { 
+              path: '/product/:id',
+              element: <DetailProductPage />,
+          },
+          {
+              path: '/',
+              element: <Navigate to="/products" replace />,
+          },
+      ]
   }
 ]);
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-      <CartProvider>
+      <Provider store={store}>
         <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
           <RouterProvider router={router}/>
         </Suspense>
-      </CartProvider>
-  </StrictMode>,
+      </Provider>
+  </StrictMode>
 );

@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchProductById } from "../redux/features/productSlice";
-import { addToCart } from "../redux/features/cartSlice";
+import { fetchProductById } from "../redux/actions/singleProductActions";
+import { addToCart } from "../redux/actions/cartActions";
 
 import Button from "../components/Elements/Button";
 
@@ -15,7 +15,7 @@ const DetailProductPage = () => {
     dispatch(fetchProductById(id));
   }, [id, dispatch]);
 
-  if (loading === 'pending' || loading === 'idle') {
+  if (loadingSingle) {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="text-xl">Loading...</div>
@@ -46,7 +46,7 @@ const DetailProductPage = () => {
           &larr; Back to Products
         </Link>
       </div>
-      <div className="flex flex-col md:flex-row gap-10 bg-gray-100 p-8 rounded-lg shadow-lg">
+      <div className="flex flex-col md:flex-row gap-10 bg-white p-8 rounded-lg shadow-lg border border-gray-200">
         <div className="md:w-1/3 flex justify-center">
           <img src={selectedProduct.image} alt={selectedProduct.title} className="max-h-96 object-contain rounded-lg" />
         </div>
