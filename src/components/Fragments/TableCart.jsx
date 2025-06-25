@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'; 
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { removeItem, clearCart } from "../../redux/features/cartSlice";
+import { showNotification } from "../../redux/features/notificationSlice";
 
 const TableCart = () => {
     const dispatch = useDispatch();
@@ -12,6 +13,24 @@ const TableCart = () => {
         if (!cart) return 0;
         return cart.reduce((acc, item) => acc + (item.price || 0) * item.qty, 0);
     }, [cart]);
+
+    const handleRemoveItem = (item) => {
+        dispatch(removeItem(item.id));
+        const payload = {
+            message: `Removed "${item.title.substring(0, 20)}..." from cart`,
+            type: 'error'
+        };
+        dispatch(showNotification(payload));
+    };
+
+    const handleClearCart = () => {
+        dispatch(clearCart());
+        const payload = {
+            message: "Cart has been cleared successfully",
+            type: 'error'
+        };
+        dispatch(showNotification(payload));
+    };
 
     return (
         <div className="w-[29%] p-4 bg-white rounded-lg shadow">
@@ -44,7 +63,7 @@ const TableCart = () => {
                                 }) || "-"}
                             </td>
                             <td className="py-2 px-2 text-right">
-                                <button onClick={() => dispatch(removeItem(item.id))}>
+                                <button onClick={() => handleRemoveItem(item)}>
                                     <FontAwesomeIcon icon={faTrash} className="w-5 h-5 text-red-600 hover:text-red-800" />
                                 </button>
                             </td>
@@ -56,7 +75,7 @@ const TableCart = () => {
                             <td colSpan="2" className="py-3">
                                 <button
                                     className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm shadow"
-                                    onClick={() => dispatch(clearCart())}
+                                    onClick={() => handleClearCart()}
                                 >
                                     Clear Cart
                                 </button>

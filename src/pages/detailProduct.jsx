@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchProductById } from "../redux/features/productSlice";
 import { addToCart } from "../redux/features/cartSlice";
+import { showNotification } from "../redux/features/notificationSlice";
 
 import Button from "../components/Elements/Button";
 
@@ -39,6 +40,15 @@ const DetailProductPage = () => {
     );
   }
 
+  const handleAddToCart = (product) => {
+    dispatch(addToCart(product));
+    const payload = {
+      message: `Successfully added "${product.title.substring(0, 20)}..." to cart`,
+      type: 'success'
+    };
+    dispatch(showNotification(payload));
+  };
+
   return (
     <div className="container mx-auto my-10 px-4">
       <div className="mb-8">
@@ -62,7 +72,7 @@ const DetailProductPage = () => {
             </span>
             <Button 
               classname="bg-blue-600 text-white px-10"
-              onClick={() => dispatch(addToCart(selectedProduct))}
+              onClick={() => handleAddToCart(selectedProduct)}
             >
               Add to Cart
             </Button>

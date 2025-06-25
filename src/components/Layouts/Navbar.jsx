@@ -1,19 +1,24 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronDown, faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
+import { faChevronDown, faRightFromBracket, faSpinner } from '@fortawesome/free-solid-svg-icons';
 
 const Navbar = () => {
     const navigate = useNavigate();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
-    const email = localStorage.getItem("email");
-    const username = email ? email.split('@')[0] : '';
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
+    const username = localStorage.getItem("username");
 
     const handleLogout = () => {
-        localStorage.removeItem("email");
-        localStorage.removeItem("password");
-        navigate("/login");
+        setIsLoggingOut(true); 
+         setTimeout(() => {
+            // localStorage.removeItem("token");
+            localStorage.removeItem("access_token");
+            localStorage.removeItem("token_type");
+            localStorage.removeItem("username");
+            navigate("/login");
+        }, 500); 
     };
 
     useEffect(() => {
@@ -44,10 +49,14 @@ const Navbar = () => {
                         <div className="py-1 text-gray-700">
                             <button
                                 onClick={handleLogout}
-                                className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-100"
+                                className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled={isLoggingOut}
                             >
-                                <FontAwesomeIcon icon={faRightFromBracket} className="w-5 h-5" />
-                                Logout
+                                <FontAwesomeIcon 
+                                    icon={isLoggingOut ? faSpinner : faRightFromBracket} 
+                                    className={`w-5 h-5 ${isLoggingOut ? 'animate-spin' : ''}`}
+                                />
+                                {isLoggingOut ? 'Logging out...' : 'Logout'}
                             </button>
                         </div>
                     </div>

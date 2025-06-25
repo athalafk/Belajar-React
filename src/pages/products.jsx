@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchProducts } from "../redux/features/productSlice";
 import { addToCart } from "../redux/features/cartSlice";
+import { showNotification } from "../redux/features/notificationSlice";
 
 import CardProduct from "../components/Fragments/CardProduct";
 import TableCart from "../components/Fragments/TableCart";
@@ -20,6 +21,15 @@ const ProductsPage = () => {
     const filteredProducts = allProducts.filter((product) =>
         product.title.toLowerCase().includes(search.toLowerCase())
     );
+
+    const handleAddToCart = (product) => {
+        dispatch(addToCart(product));
+        const payload = {
+            message: `Successfully added "${product.title.substring(0, 20)}..." to cart`,
+            type: 'success'
+        };
+        dispatch(showNotification(payload));
+    };
 
     return (
         <ErrorBoundary fallback={<div>Something went wrong</div>}>
@@ -49,7 +59,7 @@ const ProductsPage = () => {
                                 </Link>
                                 <CardProduct.Footer
                                     price={product.price}
-                                    handleAddToCart={() => dispatch(addToCart(product))}
+                                    handleAddToCart={() => handleAddToCart(product)}
                                 />
                             </CardProduct>
                         ))}
