@@ -1,22 +1,23 @@
-import { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { useSelector, useDispatch } from 'react-redux';
-import { fetchProductById } from "../redux/features/productSlice";
+import { useDispatch } from 'react-redux';
 import { addToCart } from "../redux/features/cartSlice";
 import { showNotification } from "../redux/features/notificationSlice";
+import { fetchProductById } from '@/api/products';
+
+import { useQuery } from "@tanstack/react-query";
 
 import Button from "../components/Elements/Button";
 
 const DetailProductPage = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
-  const { selectedProduct, loading, error } = useSelector(state => state.products);
 
-  useEffect(() => {
-    dispatch(fetchProductById(id));
-  }, [id, dispatch]);
+  const { data: selectedProduct, isLoading, isError, error } = useQuery({
+    queryKey: ['product', id],
+    queryFn: () => fetchProductById(id),
+  });
 
-  if (loading === 'pending' || loading === 'idle') {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="text-xl">Loading...</div>
@@ -24,7 +25,7 @@ const DetailProductPage = () => {
     );
   }
   
-  if (error) {
+  if (isError) {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="text-xl text-red-500">Error: {error}</div>

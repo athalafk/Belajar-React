@@ -1,38 +1,34 @@
-import { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { loginUser } from '../../api/auth';
+import { useMutation } from '@tanstack/react-query';
+
 import Button from '../Elements/Button';
 import InputForm from '../Elements/Input';
 
 const FormLogin = () => {
-  const [loginFailed, setLoginFailed] = useState("");
-  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const mutation = useMutation({
+    mutationFn: loginUser,
+    onSuccess: (data, variables) => {
+      console.log("Login successful:", data);
+      localStorage.setItem("access_token", data.access_token);
+      localStorage.setItem("token_type", data.token_type);
+      localStorage.setItem("username", variables.username); 
+      navigate("/products");
+    },
+    onError: (error) => {
+      console.error("Login failed:", error);
+    }
+  });
 
   const handleLogin = (e) => {
     e.preventDefault();
-    setLoading(true);
-    setLoginFailed("");
-
-    const data = {
+    const credentials = {
       username: e.target.username.value,
       password: e.target.password.value,
     };
-
-    const API_LOGIN_URL = "https://freshtrack.azurewebsites.net/api/auth/login";
-    // const API_LOGIN_URL = "https://fakestoreapi.com/auth/login";
-    axios.post(API_LOGIN_URL, data)
-      .then((res) => {
-        // localStorage.setItem("token", res.data.token);
-        localStorage.setItem("access_token", res.data.access_token);
-        localStorage.setItem("token_type", res.data.token_type);
-        localStorage.setItem("username", data.username); 
-        window.location.href = "/products";
-      })
-      .catch((err) => {
-        setLoginFailed(err.response?.data || "Login failed. Please try again.");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    mutation.mutate(credentials);
   };
 
   const usernameRef = useRef(null);
@@ -43,7 +39,11 @@ const FormLogin = () => {
 
   return (
     <form onSubmit={handleLogin}>
-      {loginFailed && <p className="text-red-500 text-center text-sm mb-4">{loginFailed}</p>}
+      {mutation.isError && (
+        <div className="mb-4 text-red-500">
+          {mutation.error?.response?.data?.message || "Login failed. Please try again."}
+        </div>
+      )}
       <InputForm
         label="Username"
         name="username"
@@ -61,11 +61,11 @@ const FormLogin = () => {
       />
       <div className="mb-4">
         <Button 
-          classname={`bg-blue-600 w-full ${loading ? 'opacity-50 cursor-not-allowed' : ''}`} 
+          classname={`bg-blue-600 w-full ${mutation.isloading ? 'opacity-50 cursor-not-allowed' : ''}`} 
           type="submit"
-          disabled={loading}
+          disabled={mutation.isLoading}
         >
-          {loading ? 'Logging in...' : 'Login'}
+          {mutation.isLoading ? 'Logging in...' : 'Login'}
         </Button>
       </div>
     </form>

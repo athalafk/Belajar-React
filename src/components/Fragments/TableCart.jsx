@@ -10,6 +10,7 @@ const TableCart = () => {
     const cart = useSelector(state => state.cart.data);
 
     const totalPrice = useMemo(() => {
+        console.log("Calculating total price...");
         if (!cart) return 0;
         return cart.reduce((acc, item) => acc + (item.price || 0) * item.qty, 0);
     }, [cart]);

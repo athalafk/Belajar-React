@@ -3,6 +3,10 @@ import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import { Provider } from 'react-redux';
 import { store } from './redux/store';
+
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+
 import MainLayout from './components/Layouts/MainLayouts'; 
 import './index.css'
 
@@ -11,6 +15,7 @@ const RegisterPage = lazy(() => import('./pages/register'));
 const ProductsPage = lazy(() => import('./pages/products'));
 const DetailProductPage = lazy(() => import('./pages/detailProduct'));
 const ErrorPage = lazy(() => import('./pages/404'));
+const queryClient = new QueryClient();
 
 const router = createBrowserRouter([
   {
@@ -47,10 +52,13 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-      <Provider store={store}>
-        <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
-          <RouterProvider router={router}/>
-        </Suspense>
+    <QueryClientProvider client={queryClient}>
+        <Provider store={store}>
+            <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
+                <RouterProvider router={router}/>
+            </Suspense>
       </Provider>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   </StrictMode>
 );

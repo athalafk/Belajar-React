@@ -1,9 +1,12 @@
-import { Fragment, useState, useEffect } from "react";
+import { Fragment, useState } from "react";
 import { Link } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { fetchProducts } from "../redux/features/productSlice";
+import { useDispatch } from 'react-redux';
 import { addToCart } from "../redux/features/cartSlice";
 import { showNotification } from "../redux/features/notificationSlice";
+import { fetchProducts } from '../api/products';
+
+import { useQuery } from '@tanstack/react-query';
+// import axios from 'axios';
 
 import CardProduct from "../components/Fragments/CardProduct";
 import TableCart from "../components/Fragments/TableCart";
@@ -12,11 +15,11 @@ import ErrorBoundary from "../components/Elements/ErrorBoundary";
 const ProductsPage = () => {
     const [search, setSearch] = useState("");
     const dispatch = useDispatch();
-    const { allProducts, loading, error } = useSelector(state => state.products);
 
-    useEffect(() => {
-        dispatch(fetchProducts());
-    }, [dispatch]);
+    const { data: allProducts = [], isLoading, isError, error } = useQuery({
+        queryKey: ['products'],
+        queryFn: fetchProducts,
+    });
 
     const filteredProducts = allProducts.filter((product) =>
         product.title.toLowerCase().includes(search.toLowerCase())
@@ -47,9 +50,9 @@ const ProductsPage = () => {
                 {/* Konten Utama */}
                 <div className="flex justify-center py-5">
                     <div className="w-[80%] grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                        {loading === 'pending' && <p className="text-xl text-center col-span-full w-full">Loading products...</p>}
-                        {loading === 'failed' && <p className="text-xl text-red-500 text-center col-span-full w-full">Error: {error}</p>}
-                        {loading === 'succeeded' && filteredProducts.map((product) => (
+                        {isLoading && <p className="text-xl text-center col-span-full w-full">Loading products...</p>}
+                        {isError && <p className="text-xl text-red-500 text-center col-span-full w-full">Error: {error}</p>}
+                        {!isLoading && !isError && filteredProducts.map((product) => (
                             <CardProduct key={product.id}>
                                 <Link to={`/product/${product.id}`}>
                                     <CardProduct.Header image={product.image} />
